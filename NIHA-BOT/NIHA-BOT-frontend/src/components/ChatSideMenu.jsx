@@ -1,9 +1,10 @@
+// ChatSideMenu.js
 import React, { useRef, useState } from 'react';
 import ChatHistory from './ChatHistory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars } from '@fortawesome/free-solid-svg-icons';
 
-function ChatSideMenu({ onNewChat }) {
+function ChatSideMenu({ onNewChat, onChatSelect }) {
     const [isMenuVisible, setMenuVisible] = useState(false);
     const myDivRef = useRef(null);
 
@@ -25,7 +26,7 @@ function ChatSideMenu({ onNewChat }) {
             <div className={`sidemenu-toggle-btn ${isMenuVisible ? 'visible' : 'hidden'}`} onClick={hiddenVisibleToggle}>
                 <FontAwesomeIcon icon={faBars} />
             </div>
-            <div className="chat-sidemenu hidden" ref={myDivRef}>
+            <div className={`chat-sidemenu ${isMenuVisible ? 'visible' : 'hidden'}`} ref={myDivRef}>
                 <div className="chat-sidemenu-content">
                     <div className="sidemenu-header">
                         <button className="new_chat_button" onClick={onNewChat}>
@@ -33,7 +34,7 @@ function ChatSideMenu({ onNewChat }) {
                             New Chat
                         </button>
                     </div>
-                    <ChatHistory />
+                    <ChatHistory onChatSelect={onChatSelect} />
                 </div>
             </div>
         </>

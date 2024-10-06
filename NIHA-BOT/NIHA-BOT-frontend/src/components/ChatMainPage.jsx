@@ -1,7 +1,8 @@
+// ChatMainPage.js
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import Cookies from 'js-cookie';
 import { ToggleDarkMode } from '../assets/js/darkmode';
+import ReactMarkdown from 'react-markdown';
 import ChatSideMenu from './ChatSideMenu';
 
 function ChatMainPage() {
@@ -10,9 +11,10 @@ function ChatMainPage() {
     const [loading, setLoading] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [showSecondDiv, setShowSecondDiv] = useState(true);
-    const [chatSessions, setChatSessions] = useState([]);
     const [userName, setUserName] = useState('Guest');
+    const [currentConversationId, setCurrentConversationId] = useState(null);
     const chatContainerRef = useRef(null);
+    const [error, setError] = useState(null);
 
     const handleInputChange = (e) => {
         setUserInput(e.target.value);
@@ -26,19 +28,70 @@ function ChatMainPage() {
         setUserInput('');
         setLoading(true);
         setShowSecondDiv(false);
-        setMessages((prevMessages) => [...prevMessages, { text: userMessage, sender: 'user' }]);
+        setError(null);
+
+        const newUserMessage = { role: 'user', content: userMessage };
+        setMessages((prevMessages) => [...prevMessages, newUserMessage]);
 
         try {
-            const openaiResponse = await axios.post('http://localhost:2000/chat', {
-                prompt: userMessage
+            const response = await fetch(`http://localhost:2000/chat/${userName}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    conversation_id: currentConversationId,
+                    messages: [...messages, newUserMessage],
+                }),
             });
-            setMessages((prevMessages) => [...prevMessages, { text: openaiResponse.data.response, sender: 'bot' }]);
-        } catch (error) {
-            console.error("Error fetching OpenAI response:", error);
-            setMessages((prevMessages) => [...prevMessages, { text: "Sorry, something went wrong.", sender: 'bot' }]);
-        } finally {
+
+            const reader = response.body.getReader();
+
+            // Add a placeholder for the assistant's message
+            setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: '' }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = new TextDecoder().decode(value);
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6).trim();
+                        if (data === '[DONE]') {
+                            break;
+                        }
+                        try {
+                            const parsedData = JSON.parse(data);
+                            if (parsedData.error) {
+                                throw new Error(parsedData.error);
+                            }
+                            if (parsedData.content) {
+                                setMessages((prevMessages) => {
+                                    const updatedMessages = [...prevMessages];
+                                    updatedMessages[updatedMessages.length - 1].content += parsedData.content;
+                                    return updatedMessages;
+                                });
+                            } else if (parsedData.conversation_id) {
+                                setCurrentConversationId(parsedData.conversation_id);
+                                console.log("Conversation saved with ID:", parsedData.conversation_id);
+                            }
+                        } catch (parseError) {
+                            console.error("Error parsing JSON:", parseError);
+                        }
+                    }
+                }
+            }
+
             setLoading(false);
             scrollToBottom();
+        } catch (error) {
+            console.error("Error sending message:", error);
+            setError(error.message);
+            setMessages((prevMessages) => [...prevMessages, { role: 'assistant', content: "Sorry, an error occurred. Please try again." }]);
+            setLoading(false);
         }
     };
 
@@ -69,15 +122,41 @@ function ChatMainPage() {
     };
 
     const handleNewChatSession = () => {
-        const sessionTopic = `Chat Session ${chatSessions.length + 1}`;
-        setChatSessions([...chatSessions, { topic: sessionTopic, messages }]);
         setMessages([]);
         setShowSecondDiv(true);
+        setCurrentConversationId(null);
+    };
+
+    const handleChatSelect = async (selectedConversationId) => {
+        try {
+            console.log("Selecting conversation:", selectedConversationId);
+            const response = await fetch(`http://localhost:2000/conversation/${selectedConversationId}`);
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+            console.log('Data received:', data); // Add this line
+    
+            if (data && data.messages && data.messages.length > 0) {
+                console.log("Fetched conversation:", data);
+                setMessages(data.messages);
+                setCurrentConversationId(selectedConversationId);
+                setShowSecondDiv(false);
+            } else {
+                console.error("No messages found in the conversation data");
+                setMessages([]);
+            }
+        } catch (error) {
+            console.error("Error fetching conversation:", error);
+            setError("Failed to load conversation. Please try again.");
+        }
     };
 
     return (
         <div className={`chat-mainpage ${darkMode ? 'dark-mode' : ''}`}>
-            <ChatSideMenu onNewChat={handleNewChatSession} />
+            <ChatSideMenu onNewChat={handleNewChatSession} onChatSelect={handleChatSelect} />
             <div className="first-main-div">
                 <div className="left-div">
                     <h1 className="title">NIHA CHATBOT</h1>
@@ -119,14 +198,25 @@ function ChatMainPage() {
                 </div>
             )}
             <div className="chat-container" ref={chatContainerRef}>
-                {messages.map((msg, index) => (
-                    <div key={index} className={`message ${msg.sender}`}>
-                        <div className="message-icon">
-                            <img src={msg.sender === 'user' ? "/static/images/user.png" : "/static/images/ai.png"} alt={msg.sender} />
+                {messages && messages.length > 0 ? (
+                    messages.map((msg, index) => (
+                        <div key={index} className={`message ${msg.role}`}>
+                            <div className="message-icon">
+                                <img src={msg.role === 'user' ? "/static/images/user.png" : "/static/images/ai.png"} alt={msg.role} />
+                            </div>
+                            <div className="message-content" style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' , Width: '80%'}}>
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                            </div>
                         </div>
-                        <p>{msg.text}</p>
+                    ))
+                ) : (
+                    <p>No messages yet. Start a conversation!</p>
+                )}
+                {error && (
+                    <div className="error-message">
+                        <p>Error: {error}</p>
                     </div>
-                ))}
+                )}
             </div>
             <form onSubmit={handleSubmit}>
                 <div className="third-main-div">
@@ -145,12 +235,13 @@ function ChatMainPage() {
                             disabled={loading}
                         />
                         <div className="icons-right">
-                            <img
-                                src="/static/images/up-arrow.png"
-                                alt="send"
-                                className="icon-3"
-                                onClick={handleSubmit}
-                            />
+                            <button type="submit" className="icon-button" disabled={loading}>
+                                <img
+                                    src="/static/images/up-arrow.png"
+                                    alt="send"
+                                    className="icon-3"
+                                />
+                            </button>
                         </div>
                     </div>
                 </div>

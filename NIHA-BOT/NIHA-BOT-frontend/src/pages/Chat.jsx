@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import ChatHistory from '../components/ChatHistory';
-import ChatSideMenu from '../components/ChatSideMenu';
+// import ChatHistory from '../components/ChatHistory';
+// import ChatSideMenu from '../components/ChatSideMenu';
 import ChatMainPage from '../components/ChatMainPage';
 
 function Chat() {
@@ -47,7 +47,7 @@ function Chat() {
     return (
         <body className='Chat-body'>
         <div className={`Chat ${darkMode ? 'dark-theme' : ''}`}>
-            <ChatSideMenu/>
+            {/* <ChatSideMenu/> */}
             <ChatMainPage/>
         </div>
         </body>
