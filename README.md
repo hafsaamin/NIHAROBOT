@@ -1,48 +1,117 @@
 # 🤖 NIHAROBOT
 
-> **AI-Powered Code Generation & Robotics Intelligence**
+**Bridging the gap between artificial intelligence and robotic innovation**
 
-[![GitHub](https://img.shields.io/badge/GitHub-hafsaamin/NIHAROBOT-blue?logo=github)](https://github.com/hafsaamin/NIHAROBOT)
-[![AI](https://img.shields.io/badge/Focus-AI%20Code%20Creation-purple)](https://github.com/hafsaamin/NIHAROBOT)
-[![Status](https://img.shields.io/badge/Status-Active%20Development-green)]()
+NIHAROBOT is an AI-powered robotics code generation toolkit designed to help developers quickly generate intelligent robotic control systems.
 
 ---
 
-## 🌟 Overview
+## 🎯 Usage
 
-**NIHAROBOT** is an innovative AI-driven project focused on **intelligent code creation** and robotics automation. This repository explores the intersection of artificial intelligence and software engineering, leveraging modern AI tools to generate, optimize, and manage code for robotic systems and beyond.
+### Python Example
+
+```python
+from niharobot import CodeGenerator
+
+# Initialize the AI code generator
+generator = CodeGenerator()
+
+# Generate robotics control code
+code = generator.generate(
+    prompt="Create a PID controller for robotic arm movement",
+    language="python"
+)
+
+print(code)
+```
+
+---
+
+## 🏗️ Project Structure
+
+```
+NIHAROBOT/
+├── src/               # Source code
+├── models/            # AI models and weights
+├── examples/          # Usage examples
+├── docs/              # Documentation
+├── tests/             # Test suites
+└── README.md          # This file
+```
 
 ---
 
 ## 🚀 Features
 
-- **🧠 AI Code Generation**: Automated creation of clean, efficient code using AI models
-- **🤖 Robotics Integration**: Specialized tools for robotic system programming
-- **⚡ Smart Automation**: Streamlined development workflows
-- **🔧 Developer Tools**: Utilities to enhance productivity and code quality
-- **📚 Learning Resources**: Educational content for AI-assisted development
-
----
-
-## 🛠️ Tech Stack
-
-| Category | Technologies |
-|----------|-------------|
-| **AI/ML** | Large Language Models, Code Generation AI |
-| **Robotics** | ROS, Arduino, Raspberry Pi, Embedded Systems |
-| **Languages** | Python, C++, JavaScript |
-| **Tools** | GitHub Copilot, AI Assistants |
+- AI-powered robotics code generation
+- Multi-language support
+- Modular architecture
+- Developer-friendly API
+- Ready-to-use robotics control templates
 
 ---
 
 ## 📦 Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/hafsaamin/NIHAROBOT.git
-
-# Navigate to the project
+git clone https://github.com/your-username/NIHAROBOT.git
 cd NIHAROBOT
-
-# Install dependencies (if applicable)
 pip install -r requirements.txt
+```
+
+---
+
+## ▶️ Running an Example
+
+```bash
+python examples/example_pid.py
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+### Steps to contribute:
+
+1. Fork the repository
+2. Create your feature branch
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes
+   ```bash
+   git commit -m "Add some AmazingFeature"
+   ```
+4. Push to the branch
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open a Pull Request
+
+---
+
+## 📝 License
+
+This project is licensed under the **MIT License** — see the `LICENSE` file for details.
+
+---
+
+## 👤 Author
+
+**Hafsa Amin** (@hafsaamin)
+
+---
+
+## 🙏 Acknowledgments
+
+- GitHub Copilot & AI tools for code assistance
+- Open source robotics community
+- Contributors and supporters
+
+---
+
+> **"Bridging the gap between artificial intelligence and robotic innovation"**
+
+⭐ Star this repository if you find it helpful!
